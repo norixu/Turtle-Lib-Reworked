@@ -1,5 +1,4 @@
 local EternalUI = {}
-EternalUI.__index = EternalUI
 
 -- services
 local Players = game:GetService("Players")
@@ -10,227 +9,189 @@ local HttpService = game:GetService("HttpService")
 local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
+-- config
+local Config = {}
+local FileName = "EternalUI_Config.json"
+
+-- load config
+if readfile and isfile and isfile(FileName) then
+Config = HttpService:JSONDecode(readfile(FileName))
+end
+
+local function Save()
+if writefile then
+writefile(FileName,HttpService:JSONEncode(Config))
+end
+end
+
 -- theme
 local Theme = {
 BG = Color3.fromRGB(15,15,15),
 Light = Color3.fromRGB(25,25,25),
 Text = Color3.fromRGB(255,255,255),
-Dim = Color3.fromRGB(170,170,170),
 Accent = Color3.fromRGB(255,255,255)
 }
 
--- config
-local Config = {}
-local ConfigFile = "EternalUI_Config.json"
-
--- save
-function EternalUI:SaveConfig()
-
-if writefile then
-writefile(ConfigFile,HttpService:JSONEncode(Config))
-end
-
-end
-
--- load
-function EternalUI:LoadConfig()
-
-if readfile and isfile and isfile(ConfigFile) then
-
-Config = HttpService:JSONDecode(readfile(ConfigFile))
-
-end
-
-end
-
 -- corner
 local function Corner(obj)
-
-local c = Instance.new("UICorner")
+local c = Instance.new("UICorner",obj)
 c.CornerRadius = UDim.new(0,8)
-c.Parent = obj
-
 end
 
 -- tween
-local function Tween(obj,goal)
+local function Tween(obj,props)
+TweenService:Create(obj,TweenInfo.new(.15),props):Play()
+end
 
-TweenService:Create(
-obj,
-TweenInfo.new(.15),
-goal
-):Play()
+-- notify
+function EternalUI:Notify(text)
+
+local n = Instance.new("TextLabel")
+n.Size = UDim2.new(0,200,0,30)
+n.Position = UDim2.new(1,-210,1,-40)
+n.BackgroundColor3 = Theme.Light
+n.TextColor3 = Theme.Text
+n.Text = text
+n.Parent = PlayerGui
+Corner(n)
+
+n.BackgroundTransparency = 1
+Tween(n,{BackgroundTransparency=0})
+
+task.wait(3)
+
+Tween(n,{BackgroundTransparency=1})
+task.wait(.2)
+n:Destroy()
 
 end
 
 -- draggable
 local function Drag(frame)
 
-local drag
-local start
-local startpos
+local drag,start,pos
 
 frame.InputBegan:Connect(function(i)
-
 if i.UserInputType == Enum.UserInputType.MouseButton1 then
-
-drag = true
-start = i.Position
-startpos = frame.Position
-
+drag=true
+start=i.Position
+pos=frame.Position
 end
-
 end)
 
 frame.InputEnded:Connect(function(i)
-
 if i.UserInputType == Enum.UserInputType.MouseButton1 then
-
-drag = false
-
+drag=false
 end
-
 end)
 
 UIS.InputChanged:Connect(function(i)
-
 if drag and i.UserInputType == Enum.UserInputType.MouseMovement then
-
-local delta = i.Position - start
-
-frame.Position =
-UDim2.new(
-startpos.X.Scale,
-startpos.X.Offset + delta.X,
-startpos.Y.Scale,
-startpos.Y.Offset + delta.Y
+local delta=i.Position-start
+frame.Position=UDim2.new(
+pos.X.Scale,
+pos.X.Offset+delta.X,
+pos.Y.Scale,
+pos.Y.Offset+delta.Y
 )
-
 end
-
 end)
-
-end
-
--- notification
-function EternalUI:Notify(text)
-
-local Noti = Instance.new("TextLabel")
-Noti.Size = UDim2.new(0,200,0,30)
-Noti.Position = UDim2.new(1,-210,1,-40)
-Noti.BackgroundColor3 = Theme.Light
-Noti.TextColor3 = Theme.Text
-Noti.Text = text
-Noti.Parent = PlayerGui
-
-Corner(Noti)
-
-Noti.BackgroundTransparency = 1
-Tween(Noti,{BackgroundTransparency=0})
-
-task.wait(3)
-
-Tween(Noti,{BackgroundTransparency=1})
-
-task.wait(.2)
-
-Noti:Destroy()
 
 end
 
 -- window
 function EternalUI:CreateWindow(cfg)
 
-self:LoadConfig()
+local gui=Instance.new("ScreenGui",PlayerGui)
 
-local gui = Instance.new("ScreenGui")
-gui.Parent = PlayerGui
-
-local main = Instance.new("Frame")
-main.Size = UDim2.new(0,500,0,400)
-main.Position = UDim2.new(.5,-250,.5,-200)
-main.BackgroundColor3 = Theme.BG
-main.Parent = gui
+local main=Instance.new("Frame",gui)
+main.Size=UDim2.new(0,500,0,400)
+main.Position=UDim2.new(.5,-250,.5,-200)
+main.BackgroundColor3=Theme.BG
 Corner(main)
-
 Drag(main)
 
-local tabs = Instance.new("Frame")
-tabs.Size = UDim2.new(0,120,1,0)
-tabs.BackgroundTransparency = 1
-tabs.Parent = main
+local tabs=Instance.new("Frame",main)
+tabs.Size=UDim2.new(0,120,1,0)
 
-local pages = Instance.new("Frame")
-pages.Size = UDim2.new(1,-120,1,0)
-pages.Position = UDim2.new(0,120,0,0)
-pages.BackgroundTransparency = 1
-pages.Parent = main
+local pages=Instance.new("Frame",main)
+pages.Size=UDim2.new(1,-120,1,0)
+pages.Position=UDim2.new(0,120,0,0)
 
-local Window = {}
+local Window={}
 
 function Window:CreateTab(name)
 
-local btn = Instance.new("TextButton")
-btn.Size = UDim2.new(1,0,0,30)
-btn.BackgroundColor3 = Theme.Light
-btn.Text = name
-btn.TextColor3 = Theme.Text
-btn.Parent = tabs
-Corner(btn)
+local tabbtn=Instance.new("TextButton",tabs)
+tabbtn.Size=UDim2.new(1,0,0,30)
+tabbtn.BackgroundColor3=Theme.Light
+tabbtn.Text=name
+tabbtn.TextColor3=Theme.Text
+Corner(tabbtn)
 
-local page = Instance.new("Frame")
-page.Size = UDim2.new(1,0,1,0)
-page.Visible = false
-page.BackgroundTransparency = 1
-page.Parent = pages
+local page=Instance.new("Frame",pages)
+page.Size=UDim2.new(1,0,1,0)
+page.Visible=false
 
-btn.MouseButton1Click:Connect(function()
+local layout=Instance.new("UIListLayout",page)
+layout.Padding=UDim.new(0,6)
+
+tabbtn.MouseButton1Click:Connect(function()
 
 for _,v in pairs(pages:GetChildren()) do
-v.Visible = false
+if v:IsA("Frame") then
+v.Visible=false
+end
 end
 
-page.Visible = true
+page.Visible=true
 
 end)
 
-local Tab = {}
+local Tab={}
 
 -- button
 function Tab:Button(text,callback)
 
-local b = btn:Clone()
-b.Parent = page
-b.Text = text
+local b=tabbtn:Clone()
+b.Parent=page
+b.Text=text
 
-b.MouseButton1Click:Connect(callback)
+b.MouseButton1Click:Connect(function()
+
+Tween(b,{BackgroundColor3=Theme.Accent})
+task.wait(.1)
+Tween(b,{BackgroundColor3=Theme.Light})
+
+callback()
+
+end)
 
 end
 
 -- toggle
 function Tab:Toggle(text,callback)
 
-local state = Config[text] or false
+local state=Config[text] or false
 
-local t = btn:Clone()
-t.Parent = page
+local t=tabbtn:Clone()
+t.Parent=page
 
 local function refresh()
-
-t.Text =
-text..": "..(state and "ON" or "OFF")
-
+t.Text=text.." : "..(state and "ON" or "OFF")
 end
 
 refresh()
 
 t.MouseButton1Click:Connect(function()
 
-state = not state
+state=not state
 Config[text]=state
+Save()
+
 refresh()
+
 callback(state)
-EternalUI:SaveConfig()
 
 end)
 
@@ -239,47 +200,46 @@ end
 -- slider
 function Tab:Slider(text,min,max,callback)
 
-local value = Config[text] or min
+local val=Config[text] or min
 
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(1,0,0,40)
-frame.BackgroundColor3 = Theme.Light
-frame.Parent = page
+local frame=Instance.new("Frame",page)
+frame.Size=UDim2.new(1,0,0,40)
+frame.BackgroundColor3=Theme.Light
 Corner(frame)
 
-local bar = Instance.new("Frame")
-bar.Size = UDim2.new(1,0,0,4)
-bar.Position = UDim2.new(0,0,1,-6)
-bar.BackgroundColor3 = Theme.Dim
-bar.Parent = frame
+local label=Instance.new("TextLabel",frame)
+label.Size=UDim2.new(1,0,.5,0)
+label.Text=text.." : "..val
+label.TextColor3=Theme.Text
+label.BackgroundTransparency=1
+
+local bar=Instance.new("Frame",frame)
+bar.Size=UDim2.new(1,-10,0,6)
+bar.Position=UDim2.new(0,5,1,-10)
+bar.BackgroundColor3=Theme.BG
 Corner(bar)
 
-local fill = Instance.new("Frame")
-fill.BackgroundColor3 = Theme.Text
-fill.Size = UDim2.new((value-min)/(max-min),0,1,0)
-fill.Parent = bar
+local fill=Instance.new("Frame",bar)
+fill.Size=UDim2.new((val-min)/(max-min),0,1,0)
+fill.BackgroundColor3=Theme.Accent
 Corner(fill)
 
-frame.InputBegan:Connect(function(i)
+bar.InputBegan:Connect(function(i)
 
-if i.UserInputType ==
-Enum.UserInputType.MouseButton1 then
+if i.UserInputType==Enum.UserInputType.MouseButton1 then
 
-local pos =
-(i.Position.X - bar.AbsolutePosition.X)
-/ bar.AbsoluteSize.X
+local pos=(i.Position.X-bar.AbsolutePosition.X)/bar.AbsoluteSize.X
 
-value =
-math.floor(min+(max-min)*pos)
+val=math.floor(min+(max-min)*pos)
 
-Config[text]=value
+fill.Size=UDim2.new(pos,0,1,0)
 
-fill.Size =
-UDim2.new(pos,0,1,0)
+label.Text=text.." : "..val
 
-callback(value)
+Config[text]=val
+Save()
 
-EternalUI:SaveConfig()
+callback(val)
 
 end
 
@@ -290,66 +250,62 @@ end
 -- dropdown
 function Tab:Dropdown(text,list,callback)
 
-local current =
-Config[text] or list[1]
+local current=Config[text] or list[1]
 
-local d = btn:Clone()
-d.Parent = page
+local d=tabbtn:Clone()
+d.Parent=page
 
-d.Text =
-text..": "..current
+local function refresh()
+d.Text=text.." : "..current
+end
+
+refresh()
 
 d.MouseButton1Click:Connect(function()
 
-local index =
-table.find(list,current)+1
+local index=table.find(list,current)+1
 
-if index>#list then
-index=1
-end
+if index>#list then index=1 end
 
 current=list[index]
 
 Config[text]=current
+Save()
 
-d.Text =
-text..": "..current
+refresh()
 
 callback(current)
-
-EternalUI:SaveConfig()
 
 end)
 
 end
 
--- keybind
-function Tab:Keybind(text,default,callback)
+-- key picker
+function Tab:KeyPicker(text,default,callback)
 
-local key =
-Config[text] or default
+local key=Enum.KeyCode[Config[text]] or default
 
-local k = btn:Clone()
-k.Parent = page
+local k=tabbtn:Clone()
+k.Parent=page
 
-k.Text =
-text..": "..key.Name
+local function refresh()
+k.Text=text.." : "..key.Name
+end
+
+refresh()
 
 k.MouseButton1Click:Connect(function()
 
 k.Text="Press key..."
 
-local input =
-UIS.InputBegan:Wait()
+local input=UIS.InputBegan:Wait()
 
 key=input.KeyCode
 
 Config[text]=key.Name
+Save()
 
-k.Text =
-text..": "..key.Name
-
-EternalUI:SaveConfig()
+refresh()
 
 end)
 
