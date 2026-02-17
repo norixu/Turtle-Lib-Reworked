@@ -1,4 +1,4 @@
-local UI = loadstring(game:HttpGet("YOUR_GITHUB_LINK/source.lua"))()
+local UI = loadstring(game:HttpGet("https://raw.githubusercontent.com/norixu/eternal-ui/refs/heads/main/source.lua))()
 
 local Window = UI:CreateWindow({
 Title = "Eternal UI LIB"
