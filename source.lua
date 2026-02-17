@@ -4,7 +4,7 @@ local colorSettings = {
 		["HeaderShadingColor"] = Color3.fromRGB(18, 18, 18),
 		["HeaderTextColor"] = Color3.fromRGB(255, 255, 255),
 		["MainBackgroundColor"] = Color3.fromRGB(18, 18, 18),
-		["InfoScrollingFrameBgColor"] = Color3.fromRGB(255, 255, 255),
+		["InfoScrollingFrameBgColor"] = Color3.fromRGB(18, 18, 18),
 		["ScrollBarImageColor"] = Color3.fromRGB(255, 255, 255)
 	},
 	["RemoteButtons"] = {
@@ -25,7 +25,7 @@ local colorSettings = {
 	},
 }
 local settings = {
-	["Keybind"] = "F2"
+	["Keybind"] = "F4"
 }
 function Parent(GUI)
 	if syn and syn.protect_gui then
@@ -433,7 +433,14 @@ function Turtle:Window(Text)
 			if tabButtonOffset > tabButtonsScroll.AbsoluteSize.Y then
 				tabButtonsScroll.CanvasSize = UDim2.new(0, 0, 0, tabButtonOffset + 20)
 			end
-			return Label
+			local api = {}
+			function api:Text(newText)
+				Label.Text = newText
+			end
+			function api:Color(newColor)
+				Label.TextColor3 = newColor
+			end
+			return api
 		end
 		function Tab:Dropdown(text, buttons, callback, selective)
 			local text = text or "Dropdown"
@@ -663,6 +670,7 @@ function Turtle:Window(Text)
 			function SliderMovement(input)
 				if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 					isdragging = true
+					mainFrame.Active = false
 					local minitial = input.Position.X
 					local initial = SliderButton.Position.X.Offset
 					local delta1 = SliderButton.AbsolutePosition.X - initial
@@ -682,6 +690,7 @@ function Turtle:Window(Text)
 					input.Changed:Connect(function()
 						if input.UserInputState == Enum.UserInputState.End then
 							isdragging = false
+							mainFrame.Active = true
 						end
 					end)
 				end
@@ -819,6 +828,31 @@ function Turtle:Window(Text)
 		end
 		return Tab
 	end
+	local mobileGui = Instance.new("ScreenGui")
+	Parent(mobileGui)
+	local mobileButton = Instance.new("TextButton")
+	mobileButton.Name = "MobileToggle"
+	mobileButton.Parent = mobileGui
+	mobileButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+	mobileButton.BackgroundTransparency = 0.9
+	mobileButton.Size = UDim2.new(0, 30, 0, 30)
+	mobileButton.Position = UDim2.new(1, -45, 1, -45)
+	mobileButton.Text = "T"
+	mobileButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+	mobileButton.Font = Enum.Font.GothamBold
+	mobileButton.TextSize = 18
+	mobileButton.ZIndex = 100
+	local mbCorner = Instance.new("UICorner")
+	mbCorner.CornerRadius = UDim.new(0, 8)
+	mbCorner.Parent = mobileButton
+	local mbStroke = Instance.new("UIStroke")
+	mbStroke.Color = Color3.fromRGB(255, 255, 255)
+	mbStroke.Thickness = 1.5
+	mbStroke.Transparency = 0.7
+	mbStroke.Parent = mobileButton
+	mobileButton.MouseButton1Click:Connect(function()
+		TurtleSpyGUI.Enabled = not TurtleSpyGUI.Enabled
+	end)
 	return Window
 end
 return Turtle
