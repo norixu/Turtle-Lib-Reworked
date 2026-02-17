@@ -1,23 +1,44 @@
-local UI = loadstring(game:HttpGet("https://raw.githubusercontent.com/norixu/eternal-ui/refs/heads/main/source.lua))()
+local UI =
+loadstring(game:HttpGet("https://raw.githubusercontent.com/norixu/eternal-ui/refs/heads/main/source.lua"))()
 
-local Window = UI:CreateWindow({
-Title = "Eternal UI LIB"
-})
+local Window =
+UI:CreateWindow()
 
-local Main = Window:CreateTab("Main")
+local Tab =
+Window:CreateTab("Main")
 
-Main:CreateLabel("Welcome")
+Tab:Button("Notify",function()
 
-Main:CreateButton("Click", function()
-print("Clicked")
+UI:Notify("Hello")
+
 end)
 
-Main:CreateToggle("Toggle", function(state)
-print(state)
+Tab:Toggle("Auto Farm",function(v)
+
+print(v)
+
 end)
 
-local Misc = Window:CreateTab("Misc")
+Tab:Slider("Speed",0,100,function(v)
 
-Misc:CreateButton("Test", function()
-print("Test")
+print(v)
+
+end)
+
+Tab:Dropdown("Weapon",{
+
+"Sword",
+"Gun",
+"Bow"
+
+},function(v)
+
+print(v)
+
+end)
+
+Tab:Keybind("Kill Aura",Enum.KeyCode.E,function()
+
+print("Pressed")
+
 end)
